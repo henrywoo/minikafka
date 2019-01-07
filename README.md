@@ -1,6 +1,6 @@
-# minikafka
+# minikafka - How fast kafka could be?
 
-This article is to mimic the most basic things kafka is actually doing under the hood. This may be the simplest demo to show why kafka's design works so well. First we have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
+This article is to prove the most basic design ideas of kafka by simulating the most basic things kafka is actually doing under the hood. This may be the simplest demo to show why kafka's design works so well. First we have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
 
 - producer
 
@@ -79,4 +79,84 @@ Run it:
 ![](2.gif)
 
 
+## Why kafka is so fast or so slow?
+
+Many people says kafka is so fast and also a few people says it is too slow. I know there are many reasons kafka could be slow. But first I want to know how fast it can be. Based on my minikafka program above, I added some book keeping data in order to compare the latency between producer and consumer. They are running in the same process space so no netwroking cost. This should be the lower bound of kafka's latency.
+
+I use two arrays to save the time when producer sends message and when consumer receives the same message. pcount is the number of messages sent by producer and ccount is that received by consumer.
+```
+high_resolution_clock::time_point p[128]={}, c[128]={};
+int pcount=0;
+int ccount=0;
+```
+
+The producer just sends 128 messages of one character continuously. I record the time with a high resolution clock after sending one message.
+
+```
+void producer(const char *filePath){
+  std::fstream os(filePath, ios_base::app|ios_base::out);
+  os.rdbuf()->pubsetbuf(0, 0);
+  while (os.is_open()) {
+    os.seekp(0, os.end);
+    os << (char)(pcount);
+    p[pcount]=high_resolution_clock::now();
+    if (++pcount==128)
+      break;
+  }
+}
+```
+
+The consumer keeps pulling from the file one message each time. I also record the time after receiving one message.
+
+```
+void consumer(const char *filePath){
+  int fd = open(filePath, O_RDONLY);
+  off_t offset=0;
+  int len=1, numRead=0;
+  char* buf = (char*)malloc(len+1);
+  setvbuf(stdout,0,_IONBF,0);
+  while (fd>0) {
+    if (lseek(fd, offset, SEEK_SET) == -1) continue;
+    int numRead = 0;
+    while(numRead==0)
+      numRead = read(fd, buf, len);
+    if(numRead==1){
+      ccount++;
+      c[(int)buf[0]]=high_resolution_clock::now();
+      if((int)(buf[0])==127) break;
+    }else{break;}
+    offset += numRead;
+  }
+  free(buf);
+}
+```
+
+In main function I calculate the time between sending and receiving the same message.
+
+```
+int main(int argc, char *argv[]) {
+  const char* filePath = "/tmp/deadbeef.log";
+  auto f1=async(launch::async, producer, filePath);
+  auto f2=async(launch::async, consumer, filePath);
+  f1.get();
+  f2.get();
+  int sum=0;
+  for(int i=0;i<128;i++){
+    auto int_ns = chrono::duration_cast<chrono::nanoseconds>(c[i] - p[i]);
+    cout << i << ": " << int_ns.count() << "ns" << endl;
+    sum+=int_ns.count();
+  }
+  cout << "average delay: " << sum/128 << "ns" << endl;
+  assert(pcount==ccount and pcount==128);
+  return 0;
+}
+```
+
+Compile it:
+
+![](img/5.gif)
+
+Run:
+
+![](img/7.gif)
 
