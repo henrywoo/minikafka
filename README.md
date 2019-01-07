@@ -72,11 +72,11 @@ and then compile the code:
 g++ minikafka.cpp -lpthread -O2 -o minikafka
 ```
 
-![](1.gif)
+![](img/1.gif)
 
 Run it:
 
-![](2.gif)
+![](img/2.gif)
 
 
 ## Why kafka is so fast or so slow?
