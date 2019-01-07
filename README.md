@@ -4,7 +4,7 @@
 
 This article is to prove the most basic design ideas of kafka by simulating the most basic things kafka actually does under the hood. This may be the simplest demo to show why kafka's design works so well and how fast kafka could be.
 
-First I have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
+First I have a producer writing message to our message broker. Kafka uses a very bold design. It doesn't use any in-memory data structure to hold message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
 
 - producer
 
