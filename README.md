@@ -1,6 +1,10 @@
-# minikafka - How fast kafka could be?
+# minikafka - write your own kafka from scratch
 
-This article is to prove the most basic design ideas of kafka by simulating the most basic things kafka is actually doing under the hood. This may be the simplest demo to show why kafka's design works so well. First we have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
+## How fast kafka could be?
+
+This article is to prove the most basic design ideas of kafka by simulating the most basic things kafka actually does under the hood. This may be the simplest demo to show why kafka's design works so well and how fast kafka could be.
+
+First we have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
 
 - producer
 
@@ -162,6 +166,6 @@ Run:
 
 The latency is very low. Just 2 microseconds. This demonstrated how fast kafka could be. But why some people says kafka is slow? One reason is, to improve the throughput, kafka uses MessageSet/RecordSet which will increase the latency as a side effect, but that is the balance we need to make when designing our system. Also if consumer use an offset to pull old messages, it will be magnitude times slower as there are many disk seeks. Finally although kafka uses zero copy, bad networking or even TCP could be reason of slowness too, which is not the topic of today.
 
-Welcome to discuss with me about this article wufuheng@gmail.com. Thank you for reading and please let me know if there is anything to improve.
+Welcome to discuss with me about this article wufuheng@gmail.com. Thank you for reading and please let me know if there is any question.
 
 All updates of the article is available at: https://github.com/henrywoo/minikafka
