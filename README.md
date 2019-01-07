@@ -4,7 +4,7 @@
 
 This article is to prove the most basic design ideas of kafka by simulating the most basic things kafka actually does under the hood. This may be the simplest demo to show why kafka's design works so well and how fast kafka could be.
 
-First we have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
+First I have a producer writing to our message broker. Kafkas use a very bold design. It doesn't use any in memory data structure to hold the message like its predecessors. Instead it writes all messages to file. So this is our minikafka's producer part:
 
 - producer
 
@@ -21,7 +21,7 @@ void producer(const char *filePath){
   }
 }
 ```
-It appends message(one charater) to a file every one second. Be noted we disabled standard io buffer so actually the messages are written in to kernel buffer cache, or page cache after kernel 2.4+.
+It appends message(one charater) to a file every one second. Be noted I disabled standard io buffer so actually the messages are written in to kernel buffer cache, or page cache after kernel 2.4+.
 
 Kafka only support pull mode, which potentially reduces the server load. All the consumers just connect kafka and request for new messages from files which has been written into by producers. The following program is a consumer sending request to get message from the file every second. For realtime message, because the data are actually store in kernel buffer, so it should be fast. This is the anti-intuitive part considering it is reading from file.
 
@@ -52,7 +52,7 @@ void consumer(const char *filePath){
 
 ## Compile and Run
 
-This part is the main function. we creates two tasks with C++11's async and it will kick off both producer and consumer.
+This part is the main function. I create two tasks with C++11's async and it will launch both producer and consumer.
 
 ```
 int main(int argc, char *argv[]) {
@@ -70,7 +70,10 @@ Coding is done. Now create an empty file by:
 touch /tmp/deadbeef.log
 ```
 
-and then compile the code:
+This file is where the messages are stored. Also producer and consumer will write and read from this file respectively.
+
+
+And then compile the code:
 
 ```
 g++ minikafka.cpp -lpthread -O2 -o minikafka
@@ -78,14 +81,15 @@ g++ minikafka.cpp -lpthread -O2 -o minikafka
 
 ![](img/1.gif)
 
-Run it:
+Then run it:
 
 ![](img/2.gif)
 
+We see it works well! Consumer gets one message per second.
 
 ## Why kafka is so fast or so slow?
 
-Many people says kafka is so fast and also a few people says it is too slow. I know there are many reasons kafka could be slow. But first I want to know how fast it can be. Based on my minikafka program above, I added some book keeping data in order to calculate the latency between producer and consumer. They are running in the same process space so no netwroking cost. This should be the lower bound of kafka's latency.
+Many people says kafka is so fast but also a few people says it is too slow. I know there are many reasons kafka could be slow. But first I want to know how fast it can be. Based on my minikafka program above, I added some book keeping data in order to calculate the latency between producer and consumer. They are running in the same process space so no netwroking cost. This should be the lower bound of kafka's latency.
 
 I use two arrays to save the time when producer sends message and when consumer receives the same message. pcount is the number of messages sent by producer and ccount is that received by consumer.
 ```
