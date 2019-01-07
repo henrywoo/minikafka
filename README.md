@@ -81,7 +81,7 @@ Run it:
 
 ## Why kafka is so fast or so slow?
 
-Many people says kafka is so fast and also a few people says it is too slow. I know there are many reasons kafka could be slow. But first I want to know how fast it can be. Based on my minikafka program above, I added some book keeping data in order to compare the latency between producer and consumer. They are running in the same process space so no netwroking cost. This should be the lower bound of kafka's latency.
+Many people says kafka is so fast and also a few people says it is too slow. I know there are many reasons kafka could be slow. But first I want to know how fast it can be. Based on my minikafka program above, I added some book keeping data in order to calculate the latency between producer and consumer. They are running in the same process space so no netwroking cost. This should be the lower bound of kafka's latency.
 
 I use two arrays to save the time when producer sends message and when consumer receives the same message. pcount is the number of messages sent by producer and ccount is that received by consumer.
 ```
@@ -160,3 +160,8 @@ Run:
 
 ![](img/7.gif)
 
+The latency is very low. Just 2 microseconds. This demonstrated how fast kafka could be. But why some people says kafka is slow? One reason is, to improve the throughput, kafka uses MessageSet/RecordSet which will increase the latency as a side effect, but that is the balance we need to make when designing our system. Also if consumer use an offset to pull old messages, it will be magnitude times slower as there are many disk seeks. Finally although kafka uses zero copy, bad networking or even TCP could be reason of slowness too, which is not the topic of today.
+
+Welcome to discuss with me about this article wufuheng@gmail.com. Thank you for reading and please let me know if there is anything to improve.
+
+All updates of the article is available at: https://github.com/henrywoo/minikafka
