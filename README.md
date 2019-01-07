@@ -168,7 +168,7 @@ Run:
 
 ![](img/7.gif)
 
-The latency is very low. Just 2 microseconds. This demonstrated how fast kafka could be. But why some people says kafka is slow? One reason is, to improve the throughput, kafka uses MessageSet/RecordSet which will increase the latency as a side effect, but that is the balance we need to make when designing our system. Also if consumer use an offset to pull old messages, it will be magnitude times slower as there are many disk seeks. Finally although kafka uses zero copy, bad networking or even TCP could be reason of slowness too, which is not the topic of today.
+The latency is very low. Just 2 microseconds. This demonstrated how fast kafka could be. But why some people says kafka is slow? One reason is, to improve the throughput, kafka uses MessageSet/RecordSet which will increase the latency as a side effect, but that is the balance we need to make when designing our system. Also if consumer uses offsets to pull old messages, it will be magnitude times slower as there are many disk seeks(I doubt minikafka will cause any disk seek at all.). Finally although kafka uses zero copy, bad networking or even TCP could be reason of slowness for some people, which is not the topic of today.
 
 Welcome to discuss with me about this article wufuheng@gmail.com. Thank you for reading and please let me know if there is any question.
 
